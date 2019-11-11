@@ -1,5 +1,5 @@
-import "../src/utility";
-import * as L from "../src/utility";
+import "../src";
+import * as L from "../src";
 test("Array ext Test", () =>
 {
     const array: Array<number> = [];
