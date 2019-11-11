@@ -1,6 +1,6 @@
 {
   "name": "@lieene/ts-utility",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "utilitys for typescript",
   "main": "out/index.js",
   "types": "out/index.d.ts",
