@@ -16,6 +16,6 @@ test("Array ext Test", () =>
     expect(array.peek).toBe(30);
     expect(array.deQueue()).toBe(30);
     expect(array.peek).toBe(15);
-    expect(array.shiftMany(3)).toEqual<Array<number>>([1,2,3]);
-    expect(array).toEqual<Array<number>>([10,15]);
+    expect(array.shiftMany(3)).toEqual<Array<number>>([1, 2, 3]);
+    expect(array).toEqual<Array<number>>([10, 15]);
 });
