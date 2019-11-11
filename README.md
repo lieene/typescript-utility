@@ -1,1 +1,1 @@
-# typescript-utility
+# Lieene's type script Utilitys
