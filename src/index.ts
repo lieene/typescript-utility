@@ -223,29 +223,38 @@ export function applyMixins(derivedCtor: any, baseCtors: any[])
   });
 }
 
-export function asLiterals<T extends PropertyKey>(arr: T[]): T[]
-{
-  return arr;
-}
-export type LiteralType<TL extends Array<any>, TP> = { [K in TL[number]]: TP };
+export function asLiterals<T extends PropertyKey>(arr: T[]): T[] { return arr; }
+export type MapLiteralArray<TL extends Array<any>, TP> = { [K in TL[number]]: TP };
+
+export type ItrType<T> = T extends { [Symbol.iterator]: infer U } ? U : never;
+
+
+export type Omit2<T, K extends keyof T> = T extends { [Symbol.iterator]: infer U } ? { [Symbol.iterator]: U } & Omit<T, K> : Omit<T, K>;
+
+export type ExcludeO<T extends object, U extends object> =
+  U extends { [Symbol.iterator]: any } ? Omit<T, keyof U> :
+  T extends { [Symbol.iterator]: infer IT } ? { [Symbol.iterator]: IT } & Omit<T, keyof U> : Omit<T, keyof U>;
+
+export type ExtractO<T extends object, U extends object> =
+  U extends { [Symbol.iterator]: any } ? T extends { [Symbol.iterator]: infer IT } ?
+  { [Symbol.iterator]: IT } & Pick<T, Extract<keyof T, keyof U>> :
+  Pick<T, Extract<keyof T, keyof U>> : Pick<T, Extract<keyof T, keyof U>>;
 
 export type Merg<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
-export type MergO<U extends object> = (U extends object ? (k: U) => void : never) extends (k: infer I) => void ? (I extends object ? I : object) : object;
+export type MergO<U extends object> = (U extends object ? (k: U) => void : never) extends (k: infer T) => void ?
+  (T extends object ? T : object) : object;
 
-export type Alter<T extends object, U extends object> = Pick<T, Exclude<keyof T, keyof U>> & Pick<U, Extract<keyof T, keyof U>>;
-export type Extra<T extends object, U extends object> = Pick<T, Exclude<keyof T, keyof U>>;
-export type Common<T extends object, U extends object> = Pick<T, Extract<keyof T, keyof U>>;
-export type Extend<T extends object, U extends object> = T & Omit<U, keyof T>;
-export type Override<T extends object, U extends object> = Omit<T, keyof U> & U;
+export type Alter<T extends object, U extends object> = ExcludeO<T, U> & ExtractO<U, T>;
+export type Extend<T extends object, U extends object> = T & ExcludeO<U, T>;
+export type Override<T extends object, U extends object> = ExcludeO<T, U> & U;
 
+export type AlterOver<T extends object, U extends object, X extends object> = Alter<T, ExcludeO<U, X>>;
+export type ExtendOver<T extends object, U extends object, X extends object> = Extend<T, ExcludeO<U, X>>;
+export type OverrideOver<T extends object, U extends object, X extends object> = Override<T, ExcludeO<U, X>>;
 
-export type AlterOver<T extends object, U extends object, X extends object> = Alter<T, Extra<U, X>>;
-export type ExtendOver<T extends object, U extends object, X extends object> = Extend<T, Extra<U, X>>;
-export type OverrideOver<T extends object, U extends object, X extends object> = Override<T, Extra<U, X>>;
-
-export type AlterLike<T extends object, U extends object, X extends object> = Alter<T, Common<U, X>>;
-export type ExtendLike<T extends object, U extends object, X extends object> = Extend<T, Common<U, X>>;
-export type OverrideLike<T extends object, U extends object, X extends object> = Override<T, Common<U, X>>;
+export type AlterLike<T extends object, U extends object, X extends object> = Alter<T, ExtractO<U, X>>;
+export type ExtendLike<T extends object, U extends object, X extends object> = Extend<T, ExtractO<U, X>>;
+export type OverrideLike<T extends object, U extends object, X extends object> = Override<T, ExtractO<U, X>>;
 
 export enum AssignFilter
 {

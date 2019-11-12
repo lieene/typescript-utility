@@ -11,7 +11,10 @@ test("type map Test", () =>
     let c: CC = L.Any;
 
     interface T { a: number;[Symbol.iterator](): IterableIterator<number>; }
-    type NoA=Omit<T,'a'>;
-    let na:NoA={};
+    type NoA = Omit<T, 'a'>;
+    let na: NoA = {};
 
+    const lta = L.asLiterals(['a', 1, 'c', Symbol.iterator]);
+    type lt = typeof lta;
+    type X = L.MapLiteralArray<typeof lta, string>;
 });
