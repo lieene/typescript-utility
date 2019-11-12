@@ -1,10 +1,10 @@
-//---------------------------------------------------------------------------------//
 // File: index.ts                                                                  //
 // Project: lieene.@lieene/ts-utility                                              //
 // Created Date: Mon Nov 11 2019                                                   //
 // Author: Lieene Guo                                                              //
 // MIT License                                                                     //
-//---------------------------------------------------------------------------------//
+// Copyright (c) 2019 Lieene@ShadeRealm                                            //
+
 import { types as T } from 'util';
 import { strictEqual, notStrictEqual, deepStrictEqual, notDeepStrictEqual } from 'assert';
 import { type } from 'os';
