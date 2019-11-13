@@ -240,7 +240,8 @@ export type ExtractO<T extends object, U extends object> =
 
 export type Merg<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 export type MergO<U extends object> = (U extends object ? (k: U) => void : never) extends (k: infer T) => void ?
-  (T extends object ? T : object) : object;
+  (T extends object ? T : never) : never;
+
   
 export type UnionTupleType<A extends any[]> = A extends { [n: number]: infer T } ? T extends object ? T : never : never;
 export type MergTupleType<A extends any[]> = MergO<UnionTupleType<A>>;
