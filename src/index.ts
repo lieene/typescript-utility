@@ -228,7 +228,7 @@ export type MapLiteralArray<TL extends Array<any>, TP> = { [K in TL[number]]: TP
 
 
 export type ItrType<T> = T extends { [Symbol.iterator]: infer U } ? U : never;
-export type Omit2<T, K extends keyof T> = T extends { [Symbol.iterator]: infer U } ? { [Symbol.iterator]: U } & Omit<T, K> : Omit<T, K>;
+export type Omit2<T, K extends keyof any> = T extends { [Symbol.iterator]: infer U } ? { [Symbol.iterator]: U } & Omit<T, K> : Omit<T, K>;
 export type ExcludeO<T extends object, U extends object> =
   U extends { [Symbol.iterator]: any } ? Omit<T, keyof U> :
   T extends { [Symbol.iterator]: infer IT } ? { [Symbol.iterator]: IT } & Omit<T, keyof U> : Omit<T, keyof U>;
