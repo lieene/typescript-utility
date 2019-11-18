@@ -242,7 +242,7 @@ export type Merg<U> = (U extends any ? (k: U) => void : never) extends (k: infer
 export type MergO<U extends object> = (U extends object ? (k: U) => void : object) extends (k: infer T) => void ?
   (T extends object ? T : object) : object;
 
-  
+
 export type UnionTupleType<A extends any[]> = A extends { [n: number]: infer T } ? T extends object ? T : object : object;
 export type MergTupleType<A extends any[]> = MergO<UnionTupleType<A>>;
 
@@ -449,23 +449,25 @@ export function binarySearch(this: Array<any>, val: any, compare?: (a: any, b: a
 // let r = binarySearch.call(a,101,undefined as any);
 // console.log(r);
 // console.log(~r);
+if (!Object.prototype.hasOwnProperty('first'))
+{
+  Object.defineProperty(Array.prototype, 'first', { get: first });
+  Object.defineProperty(Array.prototype, 'last', { get: last });
+  Object.defineProperty(Array.prototype, 'peek', { get: last });
 
-Object.defineProperty(Array.prototype, 'first', { get: first });
-Object.defineProperty(Array.prototype, 'last', { get: last });
-Object.defineProperty(Array.prototype, 'peek', { get: last });
+  Array.prototype.shiftMany = shiftMany;
+  Array.prototype.popMany = popMany;
 
-Array.prototype.shiftMany = shiftMany;
-Array.prototype.popMany = popMany;
-
-Array.prototype.enQueue = Array.prototype.unshift;
-Array.prototype.deQueue = Array.prototype.pop;
-Array.prototype.deQueueMany = popMany;
-Array.prototype.pushFront = Array.prototype.unshift;
-Array.prototype.popFront = Array.prototype.shift;
-Array.prototype.popFrontMany = shiftMany;
-Array.prototype.insert = insert;
-Array.prototype.segment = segment;
-Array.prototype.binarySearch = binarySearch;
+  Array.prototype.enQueue = Array.prototype.unshift;
+  Array.prototype.deQueue = Array.prototype.pop;
+  Array.prototype.deQueueMany = popMany;
+  Array.prototype.pushFront = Array.prototype.unshift;
+  Array.prototype.popFront = Array.prototype.shift;
+  Array.prototype.popFrontMany = shiftMany;
+  Array.prototype.insert = insert;
+  Array.prototype.segment = segment;
+  Array.prototype.binarySearch = binarySearch;
+}
 
 const recursive = Symbol();
 export function IsDeeper<T>(obj: T | DeepArray<T>): obj is DeepArray<T>
