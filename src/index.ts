@@ -162,6 +162,11 @@ function contains(this: Range, index: number): boolean
 {
   return index >= this.start && index < this.end;
 }
+
+function rangeInfo(this: Range): string
+{
+  return `[${this.length}:${this.start},${this.end})`;
+}
 function getLen(this: InternalRange): number
 {
   return this._len;
@@ -193,6 +198,7 @@ export function StartLen(start: number, length: number): Range
     throw new Error('index out off range');
   }
   let rg: InternalRange = { contains, start, _len: length } as any;
+  rg.toString = rangeInfo;
   DefAccessor(rg, 'end', getEnd, setEnd);
   DefAccessor(rg, 'length', getLen, setLen);
   return rg;
