@@ -5,9 +5,6 @@
 // MIT License                                                                     //
 // Copyright (c) 2019 Lieene@ShadeRealm                                            //
 
-import { types as T } from 'util';
-import { strictEqual, notStrictEqual, deepStrictEqual, notDeepStrictEqual } from 'assert';
-import { type } from 'os';
 
 export const Uny: any = undefined as any;
 export const Any: any = {} as any;
@@ -46,11 +43,11 @@ export function ValiadOrDefault<T>(obj: T | undefined | null, defaultValue: T): 
 
 export function IsRegExp(obj: any): obj is RegExp
 {
-  return T.isRegExp(obj);
+  return obj.test !== undefined && obj.exec !== undefined;
 }
 export function NotRegX<T>(obj: RegExp | T): obj is T
 {
-  return !T.isRegExp(obj);
+  return !IsRegExp(obj);
 }
 
 export function IsNumber(obj: any): obj is number
@@ -507,11 +504,6 @@ export function Lines(text: string): string[]
 {
   return text.split(/\r\n\|\n/);
 }
-
-export let equalVal = strictEqual;
-export let notEqualVal = notStrictEqual;
-export let deepEqualVal = deepStrictEqual;
-export let notDeepEqualVal = notDeepStrictEqual;
 
 // function func(this: any): string
 // { return (this === undefined ? "" : this.a.toString()) + ((func as any).texts as string[]).join('.'); }
