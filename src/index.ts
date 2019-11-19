@@ -261,6 +261,40 @@ export type AlterLike<T extends object, U extends object, X extends object> = Al
 export type ExtendLike<T extends object, U extends object, X extends object> = Extend<T, ExtractO<U, X>>;
 export type OverrideLike<T extends object, U extends object, X extends object> = Override<T, ExtractO<U, X>>;
 
+export interface PropertyInfo<T> extends TypedPropertyDescriptor<T>
+{
+  key: PropertyKey;
+}
+export type ObjectProperties<T extends object> =
+  { [P in keyof T]: TypedPropertyDescriptor<T[P]> } &
+  Map<PropertyKey, PropertyDecorator>;
+
+// export function GetObjectProperties<T extends object>(O: T): ObjectProperties<T>
+// {
+//   let keys: PropertyKey[] = [];
+//   keys.push(...Object.getOwnPropertySymbols(O));
+//   keys.push(...Object.getOwnPropertyNames(O));
+//   //let op: any = {};
+//   //op =
+//   //let op: ObjectProperties<T> = Any;
+//   //return op;
+// }
+
+export function GetProperties(O: any, keys?: PropertyKey[]): PropertyKey[]
+{
+  if (keys === undefined) { keys = []; }
+  if (typeof O !== 'object') { return keys; }
+  let obj: object = O as object;
+  keys.push(...Object.getOwnPropertySymbols(obj));
+  keys.push(...Object.getOwnPropertyNames(obj));
+  let pp = Object.getPrototypeOf(obj);
+  if (pp !== Object.prototype)
+  {
+    keys = GetProperties(pp, keys);
+  }
+  return keys;
+}
+
 export enum AssignFilter
 {
   exclude,
@@ -268,10 +302,11 @@ export enum AssignFilter
   override,
 }
 
+export function assign<U extends object, T extends object>(target: U, source: T): Extend<U, T>;
 export function assign<U extends object, T extends object>(target: U, source: T, filter: AssignFilter.exclude): Extend<U, T>;
 export function assign<U extends object, T extends object>(target: U, source: T, filter: AssignFilter.extract): Alter<U, T>;
 export function assign<U extends object, T extends object>(target: U, source: T, filter: AssignFilter.override): Override<U, T>;
-export function assign<U extends object, T extends object>(target: U, source: T, filter: AssignFilter): any
+export function assign<U extends object, T extends object>(target: U, source: T, filter: AssignFilter = AssignFilter.exclude): any
 {
   if (filter === AssignFilter.exclude)
   {
@@ -279,7 +314,8 @@ export function assign<U extends object, T extends object>(target: U, source: T,
     {
       if (!target.hasOwnProperty(key))
       {
-        (target as any)[key] = source[key];
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+        //(target as any)[key] = source[key];
       }
     }
   } else if (filter === AssignFilter.extract)
@@ -288,56 +324,123 @@ export function assign<U extends object, T extends object>(target: U, source: T,
     {
       if (target.hasOwnProperty(key))
       {
-        (target as any)[key] = source[key];
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+        //(target as any)[key] = source[key];
       }
     }
   } else
   {
-    Object.assign(target, source);
+    for (const key in source)
+    {
+      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+    }
+    //Object.assign(target, source);
   }
   return target;
 }
+export function pickAssign<U extends object, T extends object, V extends object>(target: U, source: T, pick: V): ExtendLike<U, T, V>;
 export function pickAssign<U extends object, T extends object, V extends object>(target: U, source: T, pick: V, filter: AssignFilter.exclude): ExtendLike<U, T, V>;
 export function pickAssign<U extends object, T extends object, V extends object>(target: U, source: T, pick: V, filter: AssignFilter.extract): AlterLike<U, T, V>;
 export function pickAssign<U extends object, T extends object, V extends object>(target: U, source: T, pick: V, filter: AssignFilter.override): OverrideLike<U, T, V>;
 
+export function pickAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, pick: V): ExtendLike<U, T, V>;
 export function pickAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, pick: V, filter: AssignFilter.exclude): ExtendLike<U, T, V>;
 export function pickAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, pick: V, filter: AssignFilter.extract): AlterLike<U, T, V>;
 export function pickAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, pick: V, filter: AssignFilter.override): OverrideLike<U, T, V>;
 
-export function pickAssign<U extends object, T extends object, V extends object>(target: U, source: T, pick: V, filter: AssignFilter): any
+export function pickAssign<U extends object, T extends object, V extends object>(target: U, source: T, pick: V, filter: AssignFilter = AssignFilter.exclude): any
 {
-  for (const key in source)
+  if (filter === AssignFilter.exclude)
   {
-    if (filter !== AssignFilter.override)
+    for (const key in source)
     {
-      if (filter === AssignFilter.exclude && target.hasOwnProperty(key))
+      if (!target.hasOwnProperty(key))
       {
-        continue;
-      }
-      if (filter === AssignFilter.extract && !target.hasOwnProperty(key))
-      {
-        continue;
+        if (IsArray(pick) ? pick.indexOf(key) >= 0 : pick.hasOwnProperty(key))
+        {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+        }
+        //(target as any)[key] = source[key];
       }
     }
-    if (IsArray(pick) ? pick.indexOf(key) >= 0 : pick.hasOwnProperty(key))
+  } else if (filter === AssignFilter.extract)
+  {
+    for (const key in source)
     {
-      (target as any)[key] = source[key];
+      if (target.hasOwnProperty(key))
+      {
+        if (IsArray(pick) ? pick.indexOf(key) >= 0 : pick.hasOwnProperty(key))
+        {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+        }
+        //(target as any)[key] = source[key];
+      }
     }
+  } else
+  {
+    for (const key in source)
+    {
+      if (IsArray(pick) ? pick.indexOf(key) >= 0 : pick.hasOwnProperty(key))
+      {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+      }
+    }
+    //Object.assign(target, source);
   }
   return target;
 }
 
+export function omitAssign<U extends object, T extends object, V extends object>(target: U, source: T, omit: V): ExtendOver<U, T, V>;
 export function omitAssign<U extends object, T extends object, V extends object>(target: U, source: T, omit: V, filter: AssignFilter.exclude): ExtendOver<U, T, V>;
 export function omitAssign<U extends object, T extends object, V extends object>(target: U, source: T, omit: V, filter: AssignFilter.extract): AlterOver<U, T, V>;
 export function omitAssign<U extends object, T extends object, V extends object>(target: U, source: T, omit: V, filter: AssignFilter.override): OverrideOver<U, T, V>;
 
+export function omitAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, omit: V): ExtendOver<U, T, V>;
 export function omitAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, omit: V, filter: AssignFilter.exclude): ExtendOver<U, T, V>;
 export function omitAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, omit: V, filter: AssignFilter.extract): AlterOver<U, T, V>;
 export function omitAssign<U extends object, T extends object, V extends Array<PropertyKey>>(target: U, source: T, omit: V, filter: AssignFilter.override): OverrideOver<U, T, V>;
 
-export function omitAssign<U extends object, T extends object, V extends object>(target: U, source: T, omit: V, filter: AssignFilter): any
+export function omitAssign<U extends object, T extends object, V extends object>(target: U, source: T, omit: V, filter: AssignFilter = AssignFilter.exclude): any
 {
+  if (filter === AssignFilter.exclude)
+  {
+    for (const key in source)
+    {
+      if (!target.hasOwnProperty(key))
+      {
+        if (IsArray(omit) ? omit.indexOf(key) < 0 : !omit.hasOwnProperty(key))
+        {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+        }
+        //(target as any)[key] = source[key];
+      }
+    }
+  } else if (filter === AssignFilter.extract)
+  {
+    for (const key in source)
+    {
+      if (target.hasOwnProperty(key))
+      {
+        if (IsArray(omit) ? omit.indexOf(key) < 0 : !omit.hasOwnProperty(key))
+        {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+        }
+        //(target as any)[key] = source[key];
+      }
+    }
+  } else
+  {
+    for (const key in source)
+    {
+      if (IsArray(omit) ? omit.indexOf(key) < 0 : !omit.hasOwnProperty(key))
+      {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)!);
+      }
+    }
+    //Object.assign(target, source);
+  }
+
+
   for (const key in source)
   {
     if (filter !== AssignFilter.override)
@@ -448,10 +551,6 @@ export function binarySearch(this: Array<any>, val: any, compare?: (a: any, b: a
   return ~lo;
 }
 
-// let a=[1,10,99];
-// let r = binarySearch.call(a,101,undefined as any);
-// console.log(r);
-// console.log(~r);
 if (!Object.prototype.hasOwnProperty('first'))
 {
   Object.defineProperty(Array.prototype, 'first', { get: first });
@@ -505,12 +604,5 @@ export function Lines(text: string): string[]
   return text.split(/\r\n\|\n/);
 }
 
-// function func(this: any): string
-// { return (this === undefined ? "" : this.a.toString()) + ((func as any).texts as string[]).join('.'); }
-// (func as any).texts = ['1st', '2nd'];
 
-// class XXX { a: number = 1; }
-// let xxx = new XXX();
-// console.log(func());
-// xxx.toString = func;
-// console.log(xxx.toString());
+
