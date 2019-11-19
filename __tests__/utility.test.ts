@@ -47,20 +47,26 @@ test("assign test", () =>
     let x: L.Range = L.Any;
     L.assign(x, r);
     console.log(x.length);
-
+    const aa: symbol = Symbol("AA");
     class AA
     {
+        get [aa](): number { return 10; }
         get nn(): number { return 1; }
         ss: string = "some";
+        ff(): number { return 9; }
     }
     class CC extends AA
     {
         xx: number = 1;
+        ff(): number { return 99; }
     }
     let cc = new CC();
-    let pp = L.GetProperties(cc);
-    console.log(pp.join("\r\n"));
-    let ng = CC.prototype.nn;
+    let pp = L.GetHirachyProperties(cc);
+    let oo = {};
+    L.assign(oo, cc);
+    console.log(oo);
+    L.assign(oo, { ff: ((): string => "ss") }, L.AssignFilter.alter);
+    console.log((oo as any).ff());
     // interface BB
     // {
     //     readonly nn: number;
