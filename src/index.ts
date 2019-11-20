@@ -147,6 +147,7 @@ export function DefAccessor(o: any, p: PropertyKey, get?: () => any, set?: (v: a
 
 export class Range
 {
+  static IsRange(obj: any): obj is Range { return Object.getPrototypeOf(obj) === Range.prototype; }
   constructor(start: number, length: number);
   constructor(startEnd: [number, number]);
   constructor(start: number | [number, number], length: number = 0)
