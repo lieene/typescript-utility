@@ -1,6 +1,3 @@
-import { arrayExpression } from "@babel/types";
-import { start } from "repl";
-
 // File: index.ts                                                                  //
 // Project: lieene.@lieene/ts-utility                                              //
 // Created Date: Mon Nov 11 2019                                                   //
