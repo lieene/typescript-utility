@@ -158,7 +158,7 @@ export class Range
   }
   readonly start: number;
   readonly length: number;
-  get end(): number { return this.start + this.end; }
+  get end(): number { return this.start + this.length; }
 
   intersection(other: Range): Range | undefined
   {
