@@ -145,13 +145,14 @@ export function IsArrayOf<T>(array: any, isT: (obj: any) => obj is T): array is 
 export function DefAccessor(o: any, p: PropertyKey, get?: () => any, set?: (v: any) => void)
 { Object.defineProperty(o, p, { get, set }); }
 
+export enum NoIntersection { Before, After }
 export class Range
 {
   constructor(start: number, length: number);
   constructor(startEnd: [number, number]);
   constructor(start: number | [number, number], length: number = 0)
   {
-    [start, length] = IsNumber(start) ? [start, length] : [start[0], start[1] - start[0]]
+    [start, length] = IsNumber(start) ? [start, length] : [start[0], start[1] - start[0]];
     if (start < 0 || length < 0) { throw new Error('index out off range'); }
     this.start = start >>> 0;
     this.length = length >>> 0;
@@ -160,9 +161,10 @@ export class Range
   readonly length: number;
   get end(): number { return this.start + this.length; }
 
-  intersection(other: Range): Range | undefined
+  intersection(other: Range): Range | NoIntersection
   {
-    if (this.start >= other.end && this.end <= other.start) { return undefined; }
+    if (this.start >= other.end) { return NoIntersection.After; }
+    if (this.end <= other.start) { return NoIntersection.Before; }
     else { return new Range([Math.max(this.start, other.start), Math.min(this.end, other.end)]); }
   }
 
@@ -397,7 +399,12 @@ declare global
     deQueueMany(count?: number): Array<T>;
     insert(pos: number, ...items: Array<T>): number;
     segment(start: number, length: number): Array<T>;
-    binarySearch(val: T, compare?: (a: T, b: T) => number): number;
+
+    binarySearch(val: T): T extends number ? number : never;
+    binarySearch(val: T, compare: (a: T, b: T) => number): number;
+
+    pushOrdered(val: T): T extends number ? number : never;
+    pushOrdered(val: T, compare: (a: T, b: T) => number): number;
   }
   interface ReadonlyArray<T>
   {
@@ -408,9 +415,9 @@ declare global
   }
 }
 
-export function binarySearch(this: Array<number>, val: number): number;
-export function binarySearch<T>(this: Array<T>, val: T, compare: (a: T, b: T) => number): number;
-export function binarySearch(this: Array<any>, val: any, compare?: (a: any, b: any) => number): number
+function binarySearch(this: Array<number>, val: number): number;
+function binarySearch<T>(this: Array<T>, val: T, compare: (a: T, b: T) => number): number;
+function binarySearch(this: Array<any>, val: any, compare?: (a: any, b: any) => number): number
 {
   let lo = 0;
   let hi = this.length - 1;
@@ -432,6 +439,16 @@ export function binarySearch(this: Array<any>, val: any, compare?: (a: any, b: a
   }
   return ~lo;
 }
+function pushOrdered(this: Array<number>, val: number): number;
+function pushOrdered<T>(this: Array<T>, val: T, compare: (a: T, b: T) => number): number;
+function pushOrdered(this: Array<any>, val: any, compare?: (a: any, b: any) => number): number
+{
+  if (this.length === 0) { this.push(val); return 0; }
+  let pos = IsNumber(val) ? this.binarySearch(val) : this.binarySearch(val, compare!);
+  if (pos >= 0) { pos++; this.insert(pos, val); return pos; }
+  else { pos = ~pos; this.insert(pos, val); return pos; }
+}
+
 
 if (!Object.prototype.hasOwnProperty('first'))
 {
@@ -451,6 +468,7 @@ if (!Object.prototype.hasOwnProperty('first'))
   Array.prototype.insert = insert;
   Array.prototype.segment = segment;
   Array.prototype.binarySearch = binarySearch;
+  Array.prototype.pushOrdered = pushOrdered;
 }
 
 const recursive = Symbol();
