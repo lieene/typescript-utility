@@ -156,18 +156,36 @@ export class Range
     if (start < 0 || length < 0) { throw new Error('index out off range'); }
     this.start = start >>> 0;
     this.length = length >>> 0;
+    if(this.length===0){this.startAnchor=this;this.endAnchor=this;}
+    else
+    {
+      this.startAnchor=new Range(this.start,0);
+      this.endAnchor=new Range(this.end,0);
+    }
   }
   readonly start: number;
   readonly length: number;
   get end(): number { return this.start + this.length; }
   get first(): number { return this.start; }
   get last(): number { return this.start + this.length - 1; }
+  readonly startAnchor: Range;
+  readonly endAnchor: Range;
 
-  intersection(other: Range): Range | Range.Relation.Before | Range.Relation.After
+  intersection(other: Range, ifApart?: "anchor"): Range;
+  intersection(other: Range, ifApart: "relation"): Range | Range.Relation.Before | Range.Relation.After;
+  intersection(other: Range, ifApart: "relation" | "anchor" = "anchor"): Range | Range.Relation.Before | Range.Relation.After
   {
     let start = this.start, end = this.end, start2 = other.start, end2 = other.end;
-    if (end < start2) { return Range.Relation.Before; }
-    if (start > end2) { return Range.Relation.After; }
+    if (end < start2)
+    {
+      if (ifApart === "relation") { return Range.Relation.Before; }
+      else { return this.endAnchor;}
+    }
+    if (start > end2)
+    {
+      if (ifApart === "relation") { return Range.Relation.After; }
+      else { return this.startAnchor;}
+    }
     else { return new Range([Math.max(start, start2), Math.min(end, end2)]); }
   }
 
@@ -238,10 +256,7 @@ export class Range
     }
   }
 
-  isEmpty(): boolean { return this.length === 0; }
-
-  isPositive(): boolean { return this.start >= 0; }
-
+  isAnchor(): boolean { return this.length === 0; }
   shrinkStart(count: number): Range 
   {
     count = count >>> 0;

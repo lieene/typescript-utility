@@ -87,9 +87,12 @@ test("Range test", () =>
 
     expect(r47.intersection(r57)).toEqual(r57);
     expect(r47.intersection(r59)).toEqual(r57);
-    expect(r23.intersection(r59)).toBe(L.Range.Relation.Before);
-    expect(r59.intersection(r23)).toBe(L.Range.Relation.After);
+    expect(r23.intersection(r59,"relation")).toBe(L.Range.Relation.Before);
+    expect(r59.intersection(r23,"relation")).toBe(L.Range.Relation.After);
     expect(r23.intersection(r47)).toEqual(a4);
+    expect(r33.intersection(r57)).toEqual(a4);
+    expect(r33.intersection(r00)).toEqual(a3);
+
 
     expect(a3.union(a4)).toEqual(r33);
     expect(a3.union(a4, "relation")).toBe(L.Range.Relation.Before);
@@ -101,6 +104,10 @@ test("Range test", () =>
     expect(r47.diffFrom(r57)).toEqual(r44);
     expect(r59.diffFrom(r67)).toEqual([r55,r89]);
 
+    expect(a3.startAnchor).toBe(a3);
+    expect(a3.endAnchor).toBe(a3);
+    expect(r33.startAnchor).toEqual(a3);
+    expect(r33.endAnchor).toEqual(a4);
 });
 
 test("type map Test", () =>
