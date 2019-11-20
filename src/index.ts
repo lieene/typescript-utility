@@ -1,4 +1,5 @@
 import { arrayExpression } from "@babel/types";
+import { start } from "repl";
 
 // File: index.ts                                                                  //
 // Project: lieene.@lieene/ts-utility                                              //
@@ -142,79 +143,60 @@ export function IsArrayOf<T>(array: any, isT: (obj: any) => obj is T): array is 
 }
 
 export function DefAccessor(o: any, p: PropertyKey, get?: () => any, set?: (v: any) => void)
-{
-  Object.defineProperty(o, p, { get, set });
-}
+{ Object.defineProperty(o, p, { get, set }); }
 
-export interface Range
+export class Range
 {
-  start: number;
-  length: number;
-  end: number;
-  contains(index: number): boolean;
-}
-interface InternalRange extends Range
-{
-  _len: number;
-}
-function contains(this: Range, index: number): boolean
-{
-  return index >= this.start && index < this.end;
-}
-
-function rangeInfo(this: Range): string
-{
-  return `[${this.length}:${this.start},${this.end})`;
-}
-function getLen(this: InternalRange): number
-{
-  return this._len;
-}
-function setLen(this: InternalRange, len: number): void
-{
-  this._len = Math.max(len, 0);
-}
-function getEnd(this: InternalRange): number
-{
-  return this.start + this.length;
-}
-function setEnd(this: InternalRange, end: number): void
-{
-  end = end >>> 0;
-  if (end < this.start)
+  constructor(start: number, length: number);
+  constructor(startEnd: [number, number]);
+  constructor(start: number | [number, number], length: number = 0)
   {
-    throw new Error('index out off range');
+    [start, length] = IsNumber(start) ? [start, length] : [start[0], start[1] - start[0]]
+    if (start < 0 || length < 0) { throw new Error('index out off range'); }
+    this.start = start >>> 0;
+    this.length = length >>> 0;
   }
-  this.length = end - this.start;
-}
+  readonly start: number;
+  readonly length: number;
+  get end(): number { return this.start + this.end; }
 
-export function StartLen(start: number, length: number): Range
-{
-  start = start >>> 0;
-  length = length >>> 0;
-  if (start < 0 || length < 0)
+  intersection(other: Range): Range | undefined
   {
-    throw new Error('index out off range');
+    if (this.start >= other.end && this.end <= other.start) { return undefined; }
+    else { return new Range([Math.max(this.start, other.start), Math.min(this.end, other.end)]); }
   }
-  let rg: InternalRange = { contains, start, _len: length } as any;
-  rg.toString = rangeInfo;
-  DefAccessor(rg, 'end', getEnd, setEnd);
-  DefAccessor(rg, 'length', getLen, setLen);
-  return rg;
-}
 
-export function StartEnd(start: number, end: number): Range
-{
-  start = start >>> 0;
-  end = end >>> 0;
-  if (start < 0 || end < start)
+  union(other: Range): Range { return new Range([Math.min(this.start, other.start), Math.max(this.end, other.end)]); }
+
+  isEqual(other: Range): boolean { return this.start === other.start && this.end === other.end; }
+
+  isEmpty(): boolean { return this.length === 0; }
+
+  isPositive(): boolean { return this.start >= 0; }
+
+  shrinkStart(count: number): Range | undefined
   {
-    throw new Error('index out off range');
+    count = count >>> 0;
+    let end = this.end;
+    let start = this.start + count;
+    if (start > end) { return undefined; }
+    return new Range([start, end]);
   }
-  let rg: Range = { contains, start, _len: end - start } as any;
-  DefAccessor(rg, 'end', getEnd, setEnd);
-  DefAccessor(rg, 'length', getLen, setLen);
-  return rg;
+
+  shrinkEnd(count: number): Range | undefined
+  {
+    count = count >>> 0;
+    let start = this.start;
+    let end = this.end - count;
+    if (end < start) { return undefined; }
+    return new Range([this.start, end]);
+  }
+
+  shift(count: number): Range { return new Range(this.start + count, this.end + count); }
+
+  contains(index: number): boolean { return index >= this.start && index < this.end; }
+
+  toString(): string { return `[${this.length}:${this.start},${this.end})`; }
 }
 
 export function applyMixins(derivedCtor: any, baseCtors: any[])
