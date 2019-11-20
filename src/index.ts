@@ -145,7 +145,6 @@ export function IsArrayOf<T>(array: any, isT: (obj: any) => obj is T): array is 
 export function DefAccessor(o: any, p: PropertyKey, get?: () => any, set?: (v: any) => void)
 { Object.defineProperty(o, p, { get, set }); }
 
-export enum NoIntersection { Before, After }
 export class Range
 {
   constructor(start: number, length: number);
@@ -161,16 +160,74 @@ export class Range
   readonly length: number;
   get end(): number { return this.start + this.length; }
 
-  intersection(other: Range): Range | NoIntersection
+  intersection(other: Range): Range | Range.Relation.Before | Range.Relation.After
   {
-    if (this.start >= other.end) { return NoIntersection.After; }
-    if (this.end <= other.start) { return NoIntersection.Before; }
-    else { return new Range([Math.max(this.start, other.start), Math.min(this.end, other.end)]); }
+    let start = this.start, end = this.end, start2 = other.start, end2 = other.end;
+    if (end < start2) { return Range.Relation.Before; }
+    if (start > end2) { return Range.Relation.After; }
+    else { return new Range([Math.max(start, start2), Math.min(end, end2)]); }
   }
 
-  union(other: Range): Range { return new Range([Math.min(this.start, other.start), Math.max(this.end, other.end)]); }
+  union(other: Range, ifApart?: "fill"): Range;
+  union(other: Range, ifApart: "relation"): Range | Range.Relation.Before | Range.Relation.After;
+  union(other: Range, ifApart: "fill" | "relation" = "fill"): Range | Range.Relation.Before | Range.Relation.After
+  {
+    let start = this.start, end = this.end, start2 = other.start, end2 = other.end;
+    if (ifApart === "relation")
+    {
+      if (end < start2) { return Range.Relation.Before; }
+      else if (start > end2) { return Range.Relation.After; }
+    }
+    return new Range([Math.min(this.start, other.start), Math.max(this.end, other.end)]);
+  }
+
+  diffFrom(other: Range): Range | [Range, Range] | Range.Relation.ContainedBy
+  {
+    let start = this.start, end = this.end, start2 = other.start, end2 = other.end;
+    if (start < start2)
+    {
+      if (end >= end2) { return [new Range([start, start2]), new Range([end2, end])]; }
+      else { return new Range([start, start2]); }
+    }
+    return new Range([Math.min(this.start, other.start), Math.max(this.end, other.end)]);
+  }
 
   isEqual(other: Range): boolean { return this.start === other.start && this.end === other.end; }
+
+  Compare(other: Range | number): Range.Relation
+  {
+    let start = this.start, length = this.length, end = start + length;
+    if (IsNumber(other))
+    {
+      if (other < start) { return other === (start - 1) ? Range.Relation.RightAfter : Range.Relation.After; }
+      else if (other > end) { return Range.Relation.Before; }
+      else if (other === end) { return Range.Relation.RightBefore; }
+      else if (length === 1) { return Range.Relation.Equals; }
+      else { return Range.Relation.Contains; }
+    }
+    else
+    {
+      let start2 = other.start, length2 = other.length, end2 = start + length;
+      if (end <= start2) { return Range.Relation.Before; }
+      if (start >= end2) { return Range.Relation.After; }
+      if (start < start2)
+      {
+        if (end >= end2) { return Range.Relation.Contains; }
+        else { return Range.Relation.OverlapFrontOf; }
+      }
+      else if (start === start2)
+      {
+        if (end < end2) { return Range.Relation.ContainedBy; }
+        else if (end === end2) { return Range.Relation.Equals; }
+        else { return Range.Relation.Contains; }
+      }
+      else
+      {
+        if (end <= end2) { return Range.Relation.ContainedBy; }
+        else { return Range.Relation.OverlapEndOf; }
+      }
+    }
+  }
 
   isEmpty(): boolean { return this.length === 0; }
 
@@ -200,6 +257,16 @@ export class Range
 
   toString(): string { return `[${this.length}:${this.start},${this.end})`; }
 }
+export namespace Range
+{
+  export enum Relation
+  {
+    Before = -4, RightBefore = -3, OverlapFrontOf = -2, Contains = -1,
+    Equals = 0,
+    ContainedBy = 1, OverlapEndOf = 2, RightAfter = 3, After = 4
+  }
+}
+
 
 export function applyMixins(derivedCtor: any, baseCtors: any[])
 {
