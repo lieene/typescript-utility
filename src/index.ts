@@ -503,7 +503,7 @@ declare global
     binarySearch(val: T): T extends number ? number : never;
     binarySearch(val: T, compare: (a: T, b: T) => number): number;
 
-    pushOrdered(val: T): T extends number ? number : never;
+    //pushOrdered(val: T): T extends number ? number : never;
     pushOrdered(val: T, compare: (a: T, b: T) => number): number;
   }
   interface ReadonlyArray<T>
