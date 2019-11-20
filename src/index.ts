@@ -160,6 +160,8 @@ export class Range
   readonly start: number;
   readonly length: number;
   get end(): number { return this.start + this.length; }
+  get first(): number { return this.start; }
+  get last(): number { return this.start + this.length - 1; }
 
   intersection(other: Range): Range | Range.Relation.Before | Range.Relation.After
   {
@@ -185,12 +187,12 @@ export class Range
   diffFrom(other: Range): Range | [Range, Range] | Range.Relation.ContainedBy
   {
     let start = this.start, end = this.end, start2 = other.start, end2 = other.end;
-    if (start < start2)
-    {
-      if (end >= end2) { return [new Range([start, start2]), new Range([end2, end])]; }
-      else { return new Range([start, start2]); }
-    }
-    return new Range([Math.min(this.start, other.start), Math.max(this.end, other.end)]);
+    if (start < start2 && end > end2) { return [new Range([start, start2]), new Range([end2, end])]; }
+    else if (start2 < start && end2 > end) { return Range.Relation.ContainedBy; }
+    if (start > end2 || end < start2) { return new Range([start, end]); }
+    if (start2 < end) { return new Range([start, start2]); }
+    if (end2 > start) { return new Range([end2, end]); }
+    throw new Error("Should never reach here");
   }
 
   isEqual(other: Range): boolean { return this.start === other.start && this.end === other.end; }
@@ -208,9 +210,15 @@ export class Range
     }
     else
     {
-      let start2 = other.start, length2 = other.length, end2 = start + length;
-      if (end <= start2) { return Range.Relation.Before; }
-      if (start >= end2) { return Range.Relation.After; }
+      let start2 = other.start, length2 = other.length, end2 = start2 + length2;
+      if (end < start2) { return Range.Relation.Before; }
+      if (end === start2)
+      {
+        if (length === 0 && length2 === 0) { return Range.Relation.Equals; }
+        return Range.Relation.RightBefore;
+      }
+      if (start > end2) { return Range.Relation.After; }
+      if (start === end2) { return Range.Relation.RightAfter; }
       if (start < start2)
       {
         if (end >= end2) { return Range.Relation.Contains; }
@@ -234,30 +242,39 @@ export class Range
 
   isPositive(): boolean { return this.start >= 0; }
 
-  shrinkStart(count: number): Range | undefined
+  shrinkStart(count: number): Range 
   {
     count = count >>> 0;
     let end = this.end;
     let start = this.start + count;
-    if (start > end) { return undefined; }
+    if (start > end) { start = end; }
+    if (start < 0) { start = 0; }
     return new Range([start, end]);
   }
 
-  shrinkEnd(count: number): Range | undefined
+  shrinkEnd(count: number): Range 
   {
     count = count >>> 0;
     let start = this.start;
     let end = this.end - count;
-    if (end < start) { return undefined; }
+    if (end < start) { end = start; }
     return new Range([this.start, end]);
   }
 
-  shift(count: number): Range { return new Range(this.start + count, this.end + count); }
+  shift(count: number): Range
+  {
+    count = count >>> 0;
+    let end = Math.max(this.end + count, 0);
+    let start = Math.max(this.start + count, 0);
+    return new Range(start, end);
+  }
 
   contains(index: number): boolean { return index >= this.start && index < this.end; }
 
   toString(): string { return `[${this.length}:${this.start},${this.end})`; }
 }
+
+
 export namespace Range
 {
   export enum Relation
