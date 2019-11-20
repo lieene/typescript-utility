@@ -43,7 +43,7 @@ test("type map Test", () =>
 
 test("assign test", () =>
 {
-    let r = L.StartLen(0, 10);
+    let r = new L.Range(0, 10);
     let x: L.Range = L.Any;
     L.assign(x, r);
     console.log(x.length);
