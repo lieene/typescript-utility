@@ -8,7 +8,7 @@ test("Array ext Test", () =>
     expect(array.last).toBeUndefined();
     expect(array.peek).toBeUndefined();
     expect(array.enQueue(1, 2, 3, 10, 15)).toBe(5);
-    expect(array.pushOrdered(30)).toBe(5);
+    expect(array.pushOrdered(30,(a,b)=>a-b)).toBe(5);
     expect(array).toEqual<Array<number>>([1, 2, 3, 10, 15, 30]);
     expect(array.binarySearch(4)).toBe(~3);
     expect(array.binarySearch(3)).toBe(2);

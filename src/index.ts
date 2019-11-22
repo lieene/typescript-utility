@@ -10,133 +10,88 @@ export const Uny: any = undefined as any;
 export const Any: any = {} as any;
 
 export function Defined<T>(obj: T | undefined): obj is T
-{
-  return obj !== undefined;
-}
+{ return obj !== undefined; }
+
 export function NotDefined(obj: any): obj is undefined
-{
-  return obj === undefined;
-}
+{ return obj === undefined; }
 
 export function Null<T>(obj: T | null): obj is T
-{
-  return obj !== null;
-}
+{ return obj !== null; }
+
 export function NotNull(obj: any): obj is null
-{
-  return obj === null;
-}
+{ return obj === null; }
 
 export function Valiad<T>(obj: T | undefined | null): obj is T
-{
-  return obj !== null && obj !== undefined;
-}
+{ return obj !== null && obj !== undefined; }
+
 export function Invaliad(obj: any): obj is null | undefined
-{
-  return obj === null || obj === undefined;
-}
+{ return obj === null || obj === undefined; }
 
 export function ValiadOrDefault<T>(obj: T | undefined | null, defaultValue: T): T
-{
-  return obj === null || obj === undefined ? defaultValue : obj;
-}
+{ return obj === null || obj === undefined ? defaultValue : obj; }
 
 export function IsRegExp(obj: any): obj is RegExp
-{
-  return obj.test !== undefined && obj.exec !== undefined;
-}
+{ return obj.test !== undefined && obj.exec !== undefined; }
+
 export function NotRegX<T>(obj: RegExp | T): obj is T
-{
-  return !IsRegExp(obj);
-}
+{ return !IsRegExp(obj); }
 
 export function IsNumber(obj: any): obj is number
-{
-  return typeof obj === 'number';
-}
+{ return typeof obj === 'number'; }
+
 export function NotNumber<T>(obj: number | T): obj is T
-{
-  return typeof obj !== 'number';
-}
+{ return typeof obj !== 'number'; }
 
 export function IsString(obj: any): obj is string
-{
-  return typeof obj === 'string';
-}
+{ return typeof obj === 'string'; }
+
 export function NotString<T>(obj: string | T): obj is T
-{
-  return typeof obj !== 'string';
-}
+{ return typeof obj !== 'string'; }
 
 export function IsBoolean(obj: any): obj is boolean
-{
-  return typeof obj === 'boolean';
-}
+{ return typeof obj === 'boolean'; }
+
 export function NotBoolean<T>(obj: boolean | T): obj is T
-{
-  return typeof obj !== 'boolean';
-}
+{ return typeof obj !== 'boolean'; }
 
 export function IsBigint(obj: any): obj is bigint
-{
-  return typeof obj === 'bigint';
-}
+{ return typeof obj === 'bigint'; }
+
 export function NotBigint<T>(obj: bigint | T): obj is T
-{
-  return typeof obj !== 'bigint';
-}
+{ return typeof obj !== 'bigint'; }
 
 export function IsObject(obj: any): obj is object
-{
-  return typeof obj === 'object';
-}
+{ return typeof obj === 'object'; }
+
 export function NotObject<T>(obj: object | T): obj is T
-{
-  return typeof obj !== 'object';
-}
+{ return typeof obj !== 'object'; }
 
 export function IsSymbol(obj: any): obj is symbol
-{
-  return typeof obj === 'symbol';
-}
+{ return typeof obj === 'symbol'; }
+
 export function NotSymbol<T>(obj: symbol | T): obj is T
-{
-  return typeof obj !== 'symbol';
-}
+{ return typeof obj !== 'symbol'; }
 
 export function IsFunction(obj: any): obj is (...args: any) => any
-{
-  return typeof obj === 'function';
-}
+{ return typeof obj === 'function'; }
+
 export function NotFunction<T>(obj: any): obj is T
-{
-  return typeof obj !== 'function';
-}
+{ return typeof obj !== 'function'; }
 
 export function IsArray(obj: any): obj is Array<any>
-{
-  return Array.isArray(obj);
-}
+{ return Array.isArray(obj); }
+
 export function NotArray<T>(obj: Array<any> | T): obj is T
-{
-  return !Array.isArray(obj);
-}
+{ return !Array.isArray(obj); }
 
 export function IsArrayOf<T>(array: any, isT: (obj: any) => obj is T): array is Array<T>
 {
   if (Array.isArray(array))
   {
-    if (array.length === 0)
-    {
-      return false;
-    } else
-    {
-      return isT(array[0]);
-    }
-  } else
-  {
-    return false;
+    if (array.length === 0) { return false; }
+    else { return isT(array[0]); }
   }
+  else { return false; }
 }
 
 export function DefAccessor(o: any, p: PropertyKey, get?: () => any, set?: (v: any) => void)
@@ -144,7 +99,9 @@ export function DefAccessor(o: any, p: PropertyKey, get?: () => any, set?: (v: a
 
 export class Range
 {
-  static IsRange<T>(obj: Range | T): obj is Range { return Object.getPrototypeOf(obj) === Range.prototype; }
+  static IsRange<T>(obj: Range | T): obj is Range
+  { return Object.getPrototypeOf(obj) === Range.prototype; }
+
   constructor(start: number, length: number);
   constructor(startEnd: [number, number]);
   constructor(start: number | [number, number], length: number = 0)
@@ -153,11 +110,15 @@ export class Range
     if (start < 0 || length < 0) { throw new Error('index out off range'); }
     this.start = start >>> 0;
     this.length = length >>> 0;
-    if(this.length===0){this.startAnchor=this;this.endAnchor=this;}
+    if (this.length === 0)
+    {
+      this.startAnchor = this;
+      this.endAnchor = this;
+    }
     else
     {
-      this.startAnchor=new Range(this.start,0);
-      this.endAnchor=new Range(this.end,0);
+      this.startAnchor = new Range(this.start, 0);
+      this.endAnchor = new Range(this.end, 0);
     }
   }
   readonly start: number;
@@ -176,12 +137,12 @@ export class Range
     if (end < start2)
     {
       if (ifApart === "relation") { return Range.Relation.Before; }
-      else { return this.endAnchor;}
+      else { return this.endAnchor; }
     }
     if (start > end2)
     {
       if (ifApart === "relation") { return Range.Relation.After; }
-      else { return this.startAnchor;}
+      else { return this.startAnchor; }
     }
     else { return new Range([Math.max(start, start2), Math.min(end, end2)]); }
   }
@@ -380,9 +341,36 @@ export function assign<U extends object, T extends object>(target: U, source: T,
 {
   let srcProps = GetHirachyProperties(source);
   let tarProps = GetHirachyProperties(target);
-  if (filter === AssignFilter.extend) { srcProps.forEach((v, k) => { if (!tarProps.has(k)) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
-  else if (filter === AssignFilter.alter) { srcProps.forEach((v, k) => { if (tarProps.has(k)) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
-  else { srcProps.forEach((v, k) => { v.configurable = true; Object.defineProperty(target, k, v); }); }
+  if (filter === AssignFilter.extend)
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (!tarProps.has(k))
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
+  else if (filter === AssignFilter.alter)
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (tarProps.has(k))
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
+  else
+  {
+    srcProps.forEach((v, k) =>
+    {
+      v.configurable = true;
+      Object.defineProperty(target, k, v);
+    });
+  }
   return target;
 }
 export function pickAssign<U extends object, T extends object, V extends object>(target: U, source: T, pick: V): ExtendLike<U, T, V>;
@@ -408,9 +396,39 @@ export function pickAssign<U extends object, T extends object, V extends object>
   }
   else { ppick = pick; }
 
-  if (filter === AssignFilter.extend) { srcProps.forEach((v, k) => { if (ppick.indexOf(k) >= 0 && !tarProps.has(k)) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
-  else if (filter === AssignFilter.alter) { srcProps.forEach((v, k) => { if (ppick.indexOf(k) >= 0 && tarProps.has(k)) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
-  else { srcProps.forEach((v, k) => { if (ppick.indexOf(k) >= 0) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
+  if (filter === AssignFilter.extend)
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (ppick.indexOf(k) >= 0 && !tarProps.has(k))
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
+  else if (filter === AssignFilter.alter)
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (ppick.indexOf(k) >= 0 && tarProps.has(k))
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
+  else
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (ppick.indexOf(k) >= 0)
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
   return target;
 }
 
@@ -437,9 +455,39 @@ export function omitAssign<U extends object, T extends object, V extends object>
   }
   else { oomit = omit; }
 
-  if (filter === AssignFilter.extend) { srcProps.forEach((v, k) => { if (oomit.indexOf(k) < 0 && !tarProps.has(k)) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
-  else if (filter === AssignFilter.alter) { srcProps.forEach((v, k) => { if (oomit.indexOf(k) < 0 && tarProps.has(k)) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
-  else { srcProps.forEach((v, k) => { if (oomit.indexOf(k) < 0) { v.configurable = true; Object.defineProperty(target, k, v); } }); }
+  if (filter === AssignFilter.extend)
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (oomit.indexOf(k) < 0 && !tarProps.has(k))
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
+  else if (filter === AssignFilter.alter)
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (oomit.indexOf(k) < 0 && tarProps.has(k))
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
+  else
+  {
+    srcProps.forEach((v, k) =>
+    {
+      if (oomit.indexOf(k) < 0)
+      {
+        v.configurable = true;
+        Object.defineProperty(target, k, v);
+      }
+    });
+  }
   return target;
 }
 
@@ -447,24 +495,16 @@ export type PropNullAble<T> = { [P in keyof T]: T[P] | null };
 export type PropUndefineAble<T> = { [P in keyof T]: T[P] | undefined };
 
 function first<T>(this: Array<T>): T | undefined
-{
-  return this.length === 0 ? undefined : this[0];
-}
+{ return this.length === 0 ? undefined : this[0]; }
 
 function last<T>(this: Array<T>): T | undefined
-{
-  return this.length === 0 ? undefined : this[this.length - 1];
-}
+{ return this.length === 0 ? undefined : this[this.length - 1]; }
 
 function shiftMany<T>(this: Array<T>, count: number = 1): Array<T>
-{
-  return this.splice(0, count);
-}
+{ return this.splice(0, count); }
 
 function popMany<T>(this: Array<T>, count: number = 1): Array<T>
-{
-  return this.splice(this.length - count);
-}
+{ return this.splice(this.length - count); }
 
 function insert<T>(this: Array<T>, pos: number, ...items: Array<T>): number
 {
@@ -473,9 +513,7 @@ function insert<T>(this: Array<T>, pos: number, ...items: Array<T>): number
 }
 
 function segment<T>(this: Array<T>, start: number, length: number): Array<T>
-{
-  return this.slice(start, start + length);
-}
+{ return this.slice(start, start + length); }
 
 declare global
 {
@@ -522,30 +560,32 @@ function binarySearch(this: Array<any>, val: any, compare?: (a: any, b: any) => 
   {
     let i = lo + ((hi - lo) >> 1);
     let c = compare === undefined ? this[i] - val : compare(this[i], val);
-    if (c === 0)
-    {
-      return i;
-    }
-    if (c < 0)
-    {
-      lo = i + 1;
-    } else
-    {
-      hi = i - 1;
-    }
+    if (c === 0) { return i; }
+    if (c < 0) { lo = i + 1; }
+    else { hi = i - 1; }
   }
   return ~lo;
 }
+
 function pushOrdered(this: Array<number>, val: number): number;
 function pushOrdered<T>(this: Array<T>, val: T, compare: (a: T, b: T) => number): number;
 function pushOrdered(this: Array<any>, val: any, compare?: (a: any, b: any) => number): number
 {
   if (this.length === 0) { this.push(val); return 0; }
   let pos = IsNumber(val) ? this.binarySearch(val) : this.binarySearch(val, compare!);
-  if (pos >= 0) { pos++; this.insert(pos, val); return pos; }
-  else { pos = ~pos; this.insert(pos, val); return pos; }
+  if (pos >= 0)
+  {
+    pos++;
+    this.insert(pos, val);
+    return pos;
+  }
+  else
+  {
+    pos = ~pos;
+    this.insert(pos, val);
+    return pos;
+  }
 }
-
 
 if (!Object.prototype.hasOwnProperty('first'))
 {
@@ -570,16 +610,10 @@ if (!Object.prototype.hasOwnProperty('first'))
 
 const recursive = Symbol();
 export function IsDeeper<T>(obj: T | DeepArray<T>): obj is DeepArray<T>
-{
-  return (obj as DeepArray<T>)[recursive]() === 0;
-}
+{ return (obj as DeepArray<T>)[recursive]() === 0; }
 
-class DeepArray<T> extends Array<T | DeepArray<T>> {
-  [recursive]()
-  {
-    return 0;
-  }
-}
+class DeepArray<T> extends Array<T | DeepArray<T>>
+{ [recursive]() { return 0; } }
 
 export function* EachLine(text: string): IterableIterator<string>
 {
@@ -588,18 +622,13 @@ export function* EachLine(text: string): IterableIterator<string>
   let m: RegExpExecArray | null;
   while ((m = regex.exec(text)) !== null)
   {
-    if (m.index === regex.lastIndex)
-    {
-      regex.lastIndex++;
-    }
+    if (m.index === regex.lastIndex) { regex.lastIndex++; }
     yield m[0];
   }
 }
 
 export function Lines(text: string): string[]
-{
-  return text.split(/\r\n\|\n/);
-}
+{ return text.split(/\r\n\|\n/); }
 
 
 
