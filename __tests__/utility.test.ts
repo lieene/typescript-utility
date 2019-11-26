@@ -8,7 +8,7 @@ test("Array ext Test", () =>
     expect(array.last).toBeUndefined();
     expect(array.peek).toBeUndefined();
     expect(array.enQueue(1, 2, 3, 10, 15)).toBe(5);
-    expect(array.pushOrdered(30,(a,b)=>a-b)).toBe(5);
+    expect(array.pushOrdered(30, (a, b) => a - b)).toBe(5);
     expect(array).toEqual<Array<number>>([1, 2, 3, 10, 15, 30]);
     expect(array.binarySearch(4)).toBe(~3);
     expect(array.binarySearch(3)).toBe(2);
@@ -21,6 +21,12 @@ test("Array ext Test", () =>
     expect(array.peek).toBe(15);
     expect(array.shiftMany(3)).toEqual<Array<number>>([1, 2, 3]);
     expect(array).toEqual<Array<number>>([10, 15]);
+
+    expect(L.FillNumber([], 3, 1)).toEqual<Array<number>>([1, 2, 3]);
+    expect(L.FillNumber([], -3, 1, 0.5)).toEqual<Array<number>>([1, 0.5, 0]);
+    expect(L.FillNumber([], 3, 1, -0.5)).toEqual<Array<number>>([1, 0.5, 0]);
+    expect(L.FillNumber([], -2.3, 1, -0.5)).toEqual<Array<number>>([1, 1.5]);
+
 });
 
 test("Range test", () =>
@@ -87,8 +93,8 @@ test("Range test", () =>
 
     expect(r47.intersection(r57)).toEqual(r57);
     expect(r47.intersection(r59)).toEqual(r57);
-    expect(r23.intersection(r59,"relation")).toBe(L.Range.Relation.Before);
-    expect(r59.intersection(r23,"relation")).toBe(L.Range.Relation.After);
+    expect(r23.intersection(r59, "relation")).toBe(L.Range.Relation.Before);
+    expect(r59.intersection(r23, "relation")).toBe(L.Range.Relation.After);
     expect(r23.intersection(r47)).toEqual(a4);
     expect(r33.intersection(r57)).toEqual(a4);
     expect(r33.intersection(r00)).toEqual(a3);
@@ -102,7 +108,7 @@ test("Range test", () =>
     expect(a3.diffFrom(a4)).toEqual(a3);
     expect(r34.diffFrom(r47)).toEqual(r33);
     expect(r47.diffFrom(r57)).toEqual(r44);
-    expect(r59.diffFrom(r67)).toEqual([r55,r89]);
+    expect(r59.diffFrom(r67)).toEqual([r55, r89]);
 
     expect(a3.startAnchor).toBe(a3);
     expect(a3.endAnchor).toBe(a3);

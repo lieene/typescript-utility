@@ -608,6 +608,15 @@ if (!Object.prototype.hasOwnProperty('first'))
   Array.prototype.pushOrdered = pushOrdered;
 }
 
+export function FillNumber(array: Array<number>, count: number, start: number = 0, step: number = 1): Array<number>
+{
+  if (count < 0) { step = -step; count = -count; }
+  count = count >>> 0;
+  for (let i = 0; i < count; i++)
+  { array[i] = start + (i * step); }
+  return array;
+}
+
 const recursive = Symbol();
 export function IsDeeper<T>(obj: T | DeepArray<T>): obj is DeepArray<T>
 { return (obj as DeepArray<T>)[recursive]() === 0; }
