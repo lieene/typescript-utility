@@ -28,7 +28,7 @@ export function Invaliad(obj: any): obj is null | undefined
 { return obj === null || obj === undefined; }
 
 export function ValiadOrDefault<T>(obj: T | undefined | null, defaultValue: T): T
-{ return obj === null || obj === undefined ? defaultValue : obj; }
+{ return obj || defaultValue; }
 
 export function IsRegExp(obj: any): obj is RegExp
 { return obj.test !== undefined && obj.exec !== undefined; }
@@ -559,7 +559,7 @@ function binarySearch(this: Array<any>, val: any, compare?: (a: any, b: any) => 
   while (lo <= hi)
   {
     let i = lo + ((hi - lo) >> 1);
-    let c = compare === undefined ? this[i] - val : compare(this[i], val);
+    let c = compare && compare(this[i], val) || this[i] - val;
     if (c === 0) { return i; }
     if (c < 0) { lo = i + 1; }
     else { hi = i - 1; }
